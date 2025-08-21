@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Xadrez da Moranguinho</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to bottom, #ffe6ec, #ffccda);
+      font-family: 'Cherry Bomb One', cursive;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    h1 {
+      color: #d1006c;
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px #ffc0cb;
+    }
+
+    #winner-message {
+      margin-top: 20px;
+      background-color: #fff0f5;
+      color: #d1006c;
+      padding: 15px 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 10px #ff69b4aa;
+      font-size: 1.5em;
+      display: none;
+    }
+
+    #chessboard {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      width: 90vmin;
+      height: 90vmin;
+      border: 10px dashed #ff69b4;
+      box-shadow: 0 0 20px #ff69b4aa;
+      border-radius: 20px;
+      overflow: hidden;
+      background: radial-gradient(#fff0f5, #ffcce0);
+    }
+
+    .square {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 4.5vmin;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.2s;
+    }
+
+    .light {
+      background-color: #fff0f5;
+    }
+
+    .dark {
+      background-color: #ffcce0;
+    }
+
+    .selected {
+      outline: 3px solid #ff1493;
+    }
+  </style>
+</head>
+<body>
+  <h1>🍓 Xadrez 🍓</h1>
+  <div id="chessboard"></div>
+  <div id="winner-message"></div>
+
+  <script>
+    const board = document.getElementById("chessboard");
+    const winnerMessage = document.getElementById("winner-message");
+
+    const initialBoard = [
+      ["♜", "♞", "♝", "♛", "♚", "♝", "♞", "♜"],
+      ["♟", "♟", "♟", "♟", "♟", "♟", "♟", "♟"],
+      ["", "", "", "", "", "", "", ""],
+      ["", "", "", "", "", "", "", ""],
+      ["", "", "", "", "", "", "", ""],
+      ["", "", "", "", "", "", "", ""],
+      ["♙", "♙", "♙", "♙", "♙", "♙", "♙", "♙"],
+      ["♖", "♘", "♗", "♕", "♔", "♗", "♘", "♖"]
+    ];
+
+    let selected = null;
+    let gameEnded = false;
+
+    function createBoard() {
+      board.innerHTML = "";
+      for (let row = 0; row < 8; row++) {
+        for (let col = 0; col < 8; col++) {
+          const square = document.createElement("div");
+          square.className = "square " + ((row + col) % 2 === 0 ? "light" : "dark");
+          square.textContent = initialBoard[row][col];
+          square.dataset.row = row;
+          square.dataset.col = col;
+
+          square.addEventListener("click", () => handleSquareClick(square));
+          board.appendChild(square);
+        }
+      }
+    }
+
+    function handleSquareClick(square) {
+      if (gameEnded) return;
+
+      const row = parseInt(square.dataset.row);
+      const col = parseInt(square.dataset.col);
+
+      if (selected) {
+        const fromRow = parseInt(selected.dataset.row);
+        const fromCol = parseInt(selected.dataset.col);
+
+        const movingPiece = initialBoard[fromRow][fromCol];
+        const targetPiece = initialBoard[row][col];
+
+        // Verifica se o rei foi capturado
+        if (targetPiece === "♚" || targetPiece === "♔") {
+          const winner = targetPiece === "♚" ? "🍓 Moranguinho (Branco) venceu!" : "🍇 Framboesa (Preto) venceu!";
+          initialBoard[row][col] = movingPiece;
+          initialBoard[fromRow][fromCol] = "";
+          selected.classList.remove("selected");
+          selected = null;
+          createBoard();
+          showWinner(winner);
+          return;
+        }
+
+        // Move a peça normalmente
+        initialBoard[row][col] = movingPiece;
+        initialBoard[fromRow][fromCol] = "";
+
+        selected.classList.remove("selected");
+        selected = null;
+        createBoard();
+      } else if (square.textContent !== "") {
+        square.classList.add("selected");
+        selected = square;
+      }
+    }
+
+    function showWinner(text) {
+      winnerMessage.textContent = text;
+      winnerMessage.style.display = "block";
+      gameEnded = true;
+    }
+
+    createBoard();
+  </script>
+</body>
+</html>
